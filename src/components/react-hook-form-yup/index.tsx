@@ -1,5 +1,5 @@
 import { Controller, useForm } from 'react-hook-form'
-import type { SubmitHandler } from 'react-hook-form'
+import type { Resolver, SubmitHandler } from 'react-hook-form'
 
 import FormGroup from '@/components/common/form-group'
 import { Button } from '@/components/ui/button'
@@ -15,25 +15,14 @@ import { useState } from 'react'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { EyeOffIcon } from 'lucide-react'
 import DatePicker from '@/components/common/date-picker'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { schema, type FormValues } from '@/components/react-hook-form-yup/schema'
 
-type FormValues = {
-    fullName: string
-    email: string
-    password: string
-    confirmPassword: string
-    phone: string
-    dateOfBirth: Date
-    gender: string
-    address: string
-    city: string
-    postalCode: string
-    terms: boolean
-}
-
-export default function ReactHookFormStandalone() {
+export default function ReactHookFormYup() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const { register, handleSubmit, formState: { errors, isValid }, getValues, reset, control, trigger } = useForm<FormValues>({
+        resolver: yupResolver(schema) as unknown as Resolver<FormValues>,
         mode: 'onBlur',
         defaultValues: {
             gender: '',
@@ -57,13 +46,12 @@ export default function ReactHookFormStandalone() {
         { label: "Bandung", value: "bandung" },
         { label: "Surabaya", value: "surabaya" },
     ])
-
     return (
         <Card className="w-full">
             <CardHeader>
-                <CardTitle>React Hook Form Standalone</CardTitle>
+                <CardTitle>React Hook Form + YUP</CardTitle>
                 <CardDescription>
-                    Registration form using React Hook Form without schema validation
+                    Ini adalah contoh React Hook Form + YUP
                 </CardDescription>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
@@ -74,10 +62,7 @@ export default function ReactHookFormStandalone() {
                             id="fullName"
                             type="text"
                             placeholder="John Doe"
-                            {...register('fullName', {
-                                required: 'Full name is required',
-                                minLength: { value: 3, message: 'At least 3 characters' },
-                            })}
+                            {...register('fullName')}
                             aria-invalid={errors.fullName ? 'true' : 'false'}
                         />
                         <FieldError errors={[errors.fullName]} />
@@ -85,13 +70,7 @@ export default function ReactHookFormStandalone() {
                     <FormGroup>
                         <FieldLabel htmlFor="email">Email</FieldLabel>
                         <Input id="email" type="email" placeholder="john.doe@example.com"
-                            {...register('email', {
-                                required: 'Email is required',
-                                pattern: {
-                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                    message: 'Invalid email format',
-                                },
-                            })}
+                            {...register('email')}
                             aria-invalid={errors.email ? 'true' : 'false'}
                         />
                         <FieldError errors={[errors.email]} />
@@ -101,14 +80,7 @@ export default function ReactHookFormStandalone() {
                         <InputGroup>
                             <InputGroupInput
                                 id="password" type={showPassword ? 'text' : 'password'} placeholder="*********"
-                                {...register('password', {
-                                    required: 'Password is required',
-                                    minLength: { value: 8, message: 'At least 8 characters' },
-                                    pattern: {
-                                        value: /^(?=.*[A-Z])(?=.*\d)/,
-                                        message: 'Must contain uppercase & number',
-                                    },
-                                })}
+                                {...register('password')}
                                 aria-invalid={errors.password ? 'true' : 'false'}
                             />
                             <InputGroupAddon align="inline-end" onClick={() => setShowPassword(!showPassword)}>
@@ -123,10 +95,7 @@ export default function ReactHookFormStandalone() {
                         <InputGroup>
                             <InputGroupInput
                                 id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="*********"
-                                {...register('confirmPassword', {
-                                    required: 'Please confirm your password',
-                                    validate: (value) => value === getValues('password') || 'Passwords do not match',
-                                })}
+                                {...register('confirmPassword')}
                                 aria-invalid={errors.confirmPassword ? 'true' : 'false'}
                             />
                             <InputGroupAddon align="inline-end" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
@@ -155,19 +124,6 @@ export default function ReactHookFormStandalone() {
                         <Controller
                             name='dateOfBirth'
                             control={control}
-                            rules={{
-                                required: 'Date of birth is required',
-                                validate: (value) => {
-                                    if (!value) return 'Date of birth is required'
-                                    const today = new Date()
-                                    const age = today.getFullYear() - value.getFullYear()
-                                    const monthDiff = today.getMonth() - value.getMonth()
-                                    const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < value.getDate())
-                                        ? age - 1
-                                        : age
-                                    return actualAge >= 17 || 'Must be at least 17 years old'
-                                }
-                            }}
                             render={({ field }) => (
                                 <DatePicker
                                     value={field.value}
@@ -185,9 +141,6 @@ export default function ReactHookFormStandalone() {
                         <Controller
                             name="gender"
                             control={control}
-                            rules={{
-                                required: "Please select a gender",
-                            }}
                             render={({ field }) => (
                                 <RadioGroup
                                     value={field.value}
@@ -217,10 +170,7 @@ export default function ReactHookFormStandalone() {
                     <FormGroup>
                         <FieldLabel htmlFor="address">Address</FieldLabel>
                         <Textarea id="address" placeholder="Jl. Contoh No. 123"
-                            {...register('address', {
-                                required: 'Address is required',
-                                maxLength: { value: 200, message: 'Max 200 characters' },
-                            })}
+                            {...register('address')}
                             aria-invalid={errors.address ? 'true' : 'false'}
                         />
                         <FieldError errors={[errors.address]} />
@@ -230,7 +180,6 @@ export default function ReactHookFormStandalone() {
                         <Controller
                             name="city"
                             control={control}
-                            rules={{ required: 'Please select a city' }}
                             render={({ field }) => (
                                 <Select
                                     items={cities}
@@ -268,13 +217,7 @@ export default function ReactHookFormStandalone() {
                     <FormGroup>
                         <FieldLabel htmlFor="postalCode">Postal Code</FieldLabel>
                         <Input id="postalCode" type="text" placeholder="12345"
-                            {...register('postalCode', {
-                                required: 'Postal code is required',
-                                pattern: {
-                                    value: /^\d{5}$/,
-                                    message: 'Must be exactly 5 digits',
-                                },
-                            })}
+                            {...register('postalCode')}
                             aria-invalid={errors.postalCode ? 'true' : 'false'}
                         />
                         <FieldError errors={[errors.postalCode]} />
@@ -282,7 +225,6 @@ export default function ReactHookFormStandalone() {
                     <Controller
                         name="terms"
                         control={control}
-                        rules={{ required: 'You must accept the terms' }}
                         render={({ field }) => (
                             <Field orientation="horizontal" className='my-4'>
                                 <Checkbox
