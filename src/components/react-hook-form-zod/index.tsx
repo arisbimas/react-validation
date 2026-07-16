@@ -15,19 +15,28 @@ import { useState } from 'react'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { EyeOffIcon } from 'lucide-react'
 import DatePicker from '@/components/common/date-picker'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { schema, type FormValues } from '@/components/react-hook-form-yup/schema'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { schema, type FormValues } from '@/components/react-hook-form-zod/schema'
 
-export default function ReactHookFormYup() {
+
+export default function ReactHookFormZod() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const { register, handleSubmit, formState: { errors, isValid }, reset, control, trigger } = useForm<FormValues>({
-        resolver: yupResolver(schema) as unknown as Resolver<FormValues>,
+        resolver: zodResolver(schema) as unknown as Resolver<FormValues>,
         mode: 'onBlur',
         defaultValues: {
+            fullName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            phone: '',
+            dateOfBirth: undefined,
             gender: '',
-            terms: false,
+            address: '',
             city: '',
+            postalCode: '',
+            terms: false,
         }
     })
 
@@ -46,12 +55,13 @@ export default function ReactHookFormYup() {
         { label: "Bandung", value: "bandung" },
         { label: "Surabaya", value: "surabaya" },
     ])
+
     return (
-        <Card className="w-full">
+        <Card className='w-full'>
             <CardHeader>
-                <CardTitle>React Hook Form + YUP</CardTitle>
+                <CardTitle>React Hook Form + ZOD</CardTitle>
                 <CardDescription>
-                    Ini adalah contoh React Hook Form + YUP
+                    Ini adalah contoh React Hook Form + ZOD
                 </CardDescription>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
@@ -108,13 +118,7 @@ export default function ReactHookFormYup() {
                     <FormGroup>
                         <FieldLabel htmlFor="phone">Phone</FieldLabel>
                         <Input id="phone" type="tel" placeholder="08123456789"
-                            {...register('phone', {
-                                required: 'Phone number is required',
-                                pattern: {
-                                    value: /^08\d{8,11}$/,
-                                    message: 'Invalid phone (e.g. 08123456789)',
-                                },
-                            })}
+                            {...register('phone')}
                             aria-invalid={errors.phone ? 'true' : 'false'}
                         />
                         <FieldError errors={[errors.phone]} />
